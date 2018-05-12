@@ -1,15 +1,12 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
-    private enum Site {
-        BLOCKED, OPEN
-    }
-
-    private final Site[][] sites;
+    // false - blocked, true - open
+    private final boolean[][] sites;
     private final WeightedQuickUnionUF unionFind;
     private final WeightedQuickUnionUF unionFindWithoutBottom;
     private final int n;
-    private final int first = 0;
+    private final int first;
     private final int last;
     private int openSites = 0;
 
@@ -20,21 +17,22 @@ public class Percolation {
         }
 
         this.n = n;
-        sites = new Site[n + 1][n + 1];
+        sites = new boolean[n][n];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                sites[i][j] = Site.BLOCKED;
+                sites[i][j] = false;
             }
         }
 
         unionFind = new WeightedQuickUnionUF(n * n + 2);
         unionFindWithoutBottom = new WeightedQuickUnionUF(n * n + 1);
 
-        //create virtual first site which connected to top
+        // create virtual first site which connected to top
+        first = 0;
         for (int i = 1; i <= n; i++) {
             union(first, i);
         }
-        //create virtual last site which connected to bottom
+        // create virtual last site which connected to bottom
         last = n * n + 1;
         for (int i = n * (n - 1) + 1; i <= n * n; i++) {
             unionFind.union(last, i);
@@ -46,28 +44,28 @@ public class Percolation {
         validate(row, col);
         int i = row - 1;
         int j = col - 1;
-        if (sites[i][j] == Site.BLOCKED) {
-            sites[i][j] = Site.OPEN;
+        if (!sites[i][j]) {
+            sites[i][j] = true;
             openSites++;
 
-            int p = i * n + j;
-            //connect with top
-            if (i - 1 >= 0 && sites[i - 1][j] == Site.OPEN) {
+            int p = i * n + j + 1;
+            // connect with top
+            if (i - 1 >= 0 && sites[i - 1][j]) {
                 union(p, p - n);
             }
 
-            //connect with bottom
-            if (i + 1 < n && sites[i + 1][j] == Site.OPEN) {
+            // connect with bottom
+            if (i + 1 < n && sites[i + 1][j]) {
                 union(p, p + n);
             }
 
-            //connect with left
-            if (j - 1 >= 0 && sites[i][j - 1] == Site.OPEN) {
+            // connect with left
+            if (j - 1 >= 0 && sites[i][j - 1]) {
                 union(p, p - 1);
             }
 
-            //connect with right
-            if (j + 1 < n && sites[i][j + 1] == Site.OPEN) {
+            // connect with right
+            if (j + 1 < n && sites[i][j + 1]) {
                 union(p, p + 1);
             }
         }
@@ -76,14 +74,15 @@ public class Percolation {
     // is site (row, col) open?
     public boolean isOpen(int row, int col) {
         validate(row, col);
-        return sites[row - 1][col - 1] == Site.OPEN;
+        return sites[row - 1][col - 1];
     }
 
     // is site (row, col) full?
     public boolean isFull(int row, int col) {
         validate(row, col);
-        return sites[row - 1][col - 1] == Site.OPEN &&
-                unionFindWithoutBottom.connected((row - 1) * n + col - 1, first);
+        int i = row - 1;
+        int j = col - 1;
+        return sites[i][j] && unionFindWithoutBottom.connected(i * n + j + 1, first);
     }
 
     // number of open sites
@@ -105,9 +104,5 @@ public class Percolation {
         if (row <= 0 || col <= 0 || row > n || col > n) {
             throw new IllegalArgumentException("Invalid row / col");
         }
-    }
-
-    // test client (optional)
-    public static void main(String[] args) {
     }
 }
