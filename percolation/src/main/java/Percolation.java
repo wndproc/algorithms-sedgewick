@@ -18,12 +18,6 @@ public class Percolation {
 
         this.n = n;
         sites = new boolean[n][n];
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                sites[i][j] = false;
-            }
-        }
-
         unionFind = new WeightedQuickUnionUF(n * n + 2);
         unionFindWithoutBottom = new WeightedQuickUnionUF(n * n + 1);
 
@@ -92,7 +86,7 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates() {
-        return unionFind.connected(first, last);
+        return n > 1 ? unionFind.connected(first, last) : sites[0][0];
     }
 
     private void union(int p, int q) {
