@@ -4,10 +4,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class RandomizedQueue<Item> implements Iterable<Item> {
-    private static final int INITIAL_CAPACITY = 16;
+    private static final int INITIAL_CAPACITY = 8;
     private int size = 0;
     private Item[] array;
-    private int head = 0;
     private int tail = -1;
 
     // construct an empty randomized queue
@@ -36,19 +35,28 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     // remove and return a random item
     public Item dequeue() {
         verifySize();
-        Item item = array[head];
-        array[head] = null;
-        head++;
-        size--;
-        checkSizeAndResize();
-        return item;
+        while (true) {
+            int randomIndex = StdRandom.uniform(tail + 1);
+            Item item = array[randomIndex];
+            if (item != null) {
+                array[randomIndex] = null;
+                size--;
+                checkSizeAndResize();
+                return item;
+            }
+        }
     }
 
     // return a random item (but do not remove it)
     public Item sample() {
         verifySize();
-        int randomIndex = StdRandom.uniform(tail + 1 - head) + head;
-        return array[randomIndex];
+        while (true) {
+            int randomIndex = StdRandom.uniform(tail + 1);
+            Item item = array[randomIndex];
+            if (item != null) {
+                return item;
+            }
+        }
     }
 
     // return an independent iterator over items in random order
@@ -73,23 +81,22 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         boolean arrayIsEmpty = size <= array.length / 4 && array.length > INITIAL_CAPACITY;
         if (arrayIsEmpty) {
             array = copyArray(array.length / 2);
-            head = 0;
             tail = size - 1;
         } else if (arrayIsFull) {
             array = copyArray(array.length * 2);
-            head = 0;
             tail = size - 1;
         } else if (size == 0) {
-            head = 0;
             tail = -1;
         }
     }
 
     private Item[] copyArray(int newSize) {
         Item[] newArray = (Item[]) new Object[newSize];
-        int newIndex = 0;
-        for (int oldIndex = head; oldIndex <= tail; oldIndex++, newIndex++) {
-            newArray[newIndex] = array[oldIndex];
+        for (int oldIndex = 0, newIndex = 0; oldIndex <= tail; oldIndex++) {
+            if (array[oldIndex] != null) {
+                newArray[newIndex] = array[oldIndex];
+                newIndex++;
+            }
         }
         return newArray;
     }
