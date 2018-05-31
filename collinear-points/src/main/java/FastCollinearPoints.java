@@ -4,6 +4,7 @@ import edu.princeton.cs.algs4.StdOut;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class FastCollinearPoints {
@@ -16,6 +17,7 @@ public class FastCollinearPoints {
         Arrays.sort(points);
         validateForDuplicates(points);
 
+        List<ComparableLineSegment> comparableSegments = new ArrayList<>();
         for (int a = 0; a < points.length - 3; a++) {
             Point[] sortedPoints = Arrays.copyOfRange(points, a + 1, points.length);
             Arrays.sort(sortedPoints, points[a].slopeOrder());
@@ -25,15 +27,27 @@ public class FastCollinearPoints {
                 double nextSlope = points[a].slopeTo(sortedPoints[i]);
                 if (nextSlope == slope) {
                     numberOfSegments++;
-                    if (i != sortedPoints.length - 1) {
-                        continue;
+                    if (i == sortedPoints.length - 1 && numberOfSegments >= 4) {
+                        comparableSegments.add(new ComparableLineSegment(points[a], sortedPoints[i]));
                     }
+                    continue;
                 }
                 if (numberOfSegments >= 4) {
-                    segments.add(new LineSegment(points[a], sortedPoints[i - 1]));
+                    comparableSegments.add(new ComparableLineSegment(points[a], sortedPoints[i - 1]));
                 }
                 numberOfSegments = 2;
                 slope = nextSlope;
+            }
+        }
+
+        Collections.sort(comparableSegments);
+        if (comparableSegments.size() > 0) {
+            segments.add(comparableSegments.get(0).toLineSegment());
+            for (int i = 1; i < comparableSegments.size(); i++) {
+                if (comparableSegments.get(i).compareTo(comparableSegments.get(i - 1)) == 0) {
+                    continue;
+                }
+                segments.add(comparableSegments.get(i).toLineSegment());
             }
         }
     }
@@ -91,10 +105,33 @@ public class FastCollinearPoints {
 
         // print and draw the line segments
         FastCollinearPoints collinear = new FastCollinearPoints(points);
+        System.out.println(collinear.segments.size());
         for (LineSegment segment : collinear.segments()) {
             StdOut.println(segment);
             segment.draw();
         }
         StdDraw.show();
+    }
+
+    private static class ComparableLineSegment implements Comparable<ComparableLineSegment> {
+        private final Point p;
+        private final Point q;
+
+        public ComparableLineSegment(Point p, Point q) {
+            this.p = p;
+            this.q = q;
+        }
+
+        public LineSegment toLineSegment() {
+            return new LineSegment(p, q);
+        }
+
+        @Override
+        public int compareTo(ComparableLineSegment o) {
+            if (q.compareTo(o.q) == 0) {
+                return Double.compare(p.slopeTo(q), o.p.slopeTo(o.q));
+            }
+            return q.compareTo(o.q);
+        }
     }
 }
