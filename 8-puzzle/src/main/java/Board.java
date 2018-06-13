@@ -150,7 +150,7 @@ public class Board {
 
     private Board createNeighbor(int i, int j) {
         int[][] copy = copyArray(blocks);
-        exchange(copy, zeroI, zeroI, i, j);
+        exchange(copy, zeroI, zeroJ, i, j);
         return new Board(copy);
     }
 
