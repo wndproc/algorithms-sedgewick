@@ -87,24 +87,24 @@ public class Solver {
         final Board board;
         final int moves;
         final SearchNode predecessor;
-        final int hamming;
+        final int priority;
 
         SearchNode(Board board) {
             this.board = board;
             moves = 0;
             predecessor = null;
-            hamming = board.hamming();
+            priority = board.manhattan();
         }
 
         SearchNode(Board board, SearchNode predecessor) {
             this.board = board;
-            this.moves = predecessor.moves + 1;
             this.predecessor = predecessor;
-            hamming = board.hamming();
+            moves = predecessor.moves + 1;
+            priority = moves + board.manhattan();
         }
 
         int getPriority() {
-            return moves + hamming;
+            return priority;
         }
 
         @Override

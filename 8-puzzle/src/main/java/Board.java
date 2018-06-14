@@ -74,7 +74,11 @@ public class Board {
     // a board that is obtained by exchanging any pair of blocks
     public Board twin() {
         int[][] twin = copyArray(blocks);
-        exchange(twin, 0, 0, 0, 1);
+        if (blocks[0][0] != 0 && blocks[0][1] != 0) {
+            exchange(twin, 0, 0, 0, 1);
+        } else {
+            exchange(twin, 1, 0, 1, 1);
+        }
         return new Board(twin);
     }
 
@@ -107,10 +111,13 @@ public class Board {
 
     // string representation of this board (in the output format specified below)
     public String toString() {
+        String format = "%1$" + Math.max(Integer.toString(n * n - 1).length(), 2) + "s";
         StringBuilder sb = new StringBuilder();
+        sb.append(n);
+        sb.append("\n");
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                sb.append(blocks[i][j]);
+                sb.append(String.format(format, blocks[i][j]));
                 if (j < n - 1) {
                     sb.append(" ");
                 }
@@ -156,7 +163,8 @@ public class Board {
 
     // unit tests (not graded)
     public static void main(String[] args) {
-        Board board = new Board(new int[][]{{8, 1, 3}, {4, 0, 2}, {7, 6, 5}});
+        // Board board = new Board(new int[][]{{8, 1, 3}, {4, 0, 2}, {7, 6, 5}});
+        Board board = new Board(new int[][]{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 0}});
         System.out.println(board.toString());
         System.out.println("is goal: " + board.isGoal());
         System.out.println("hamming: " + board.hamming());
